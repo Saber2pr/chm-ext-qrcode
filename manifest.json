@@ -1,0 +1,58 @@
+{
+  "name": "Qrcode Edit",
+  "description": "Qrcode Edit",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "homepage_url": "https://github.com/saber2pr/chm-ext-qrcode",
+  "icons": {
+    "64": "assets/logo.png"
+  },
+  "page_action": {
+    "default_icon": "assets/logo.png",
+    "default_title": "Qrcode Edit"
+  },
+  "commands": {
+    "Qrcode Edit": {
+      "description": "Qrcode Edit"
+    }
+  },
+  "background": {
+    "scripts": [
+      "src/util.js",
+      "src/background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_globs": [
+        "https://www.google*"
+      ],
+      "js": [
+        "src/lib/qrcode-parser.min.js",
+        "src/lib/qrcode.js",
+        "src/util.js",
+        "src/content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "externally_connectable": {
+    "ids": [
+      "*"
+    ]
+  },
+  "permissions": [
+    "notifications",
+    "contextMenus",
+    "tabs",
+    "storage",
+    "<all_urls>"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src * 'unsafe-inline'; img-src 'self' data:;",
+  "update_url": "https://clients2.google.com/service/update2/crx"
+}
