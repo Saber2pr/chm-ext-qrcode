@@ -18,7 +18,7 @@ onMessage(data => {
   if (element) {
     const isImg = element.tagName.toLowerCase() === 'img'
     const backgroundImage = isImg ? element.src : element.style.backgroundImage
-    if (backgroundImage && /base64/.test(backgroundImage)) {
+    if (backgroundImage) {
       const base64 = backgroundImage.replace(/^url\([\s\S].*?base64,/, '').replace(/"\)$/, '')
       qrcodeParser(base64).then(res => {
         const url = res.data
