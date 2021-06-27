@@ -6,6 +6,13 @@ window.addEventListener('contextmenu', event => {
   y = event.clientY
 })
 
+window.addEventListener('error', event => {
+  const filename = event.filename
+  if (filename.startsWith('chrome-extension://')) {
+    alert(event.error)
+  }
+})
+
 /**
  * @returns {HTMLElement}
  */
