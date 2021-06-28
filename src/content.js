@@ -19,6 +19,7 @@ window.addEventListener('error', event => {
 const getClickElement = () => document.elementFromPoint(x, y)
 
 let qrcode = null
+let tempQuery = ''
 
 /**
  * @param {HTMLElement} element 
@@ -45,9 +46,17 @@ const editQrcodeElement = (element) => {
           if (isImg) {
             element.src = newBase64
           } else if (isCanvas) {
+            // copy attrs
+            const attrs = element.getAttributeNames()
+            if (attrs && attrs.length) {
+              attrs.forEach(key => {
+                if (!['width', 'height'].includes(key)) {
+                  canvas.setAttribute(key, element.getAttribute(key))
+                }
+              })
+            }
             element.parentElement.replaceChild(canvas, element)
-          }
-          else {
+          } else {
             element.style.backgroundImage = `url(${newBase64})`
           }
         }
@@ -64,10 +73,15 @@ onMessage(info => {
     editQrcodeElement(getClickElement())
   }
   if (info.menuItemId === COM_QUERY) {
-    const selector = window.prompt('Query a qrcode element:')
+    const selector = window.prompt('Query a qrcode element:', tempQuery)
     if (selector) {
       const element = document.querySelector(selector)
-      element && editQrcodeElement(element)
+      if (element) {
+        tempQuery = selector
+        editQrcodeElement(element)
+      } else {
+        alert('cannot found an element by the query!')
+      }
     }
   }
 })
