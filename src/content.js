@@ -20,11 +20,14 @@ const getClickElement = () => document.elementFromPoint(x, y)
 
 let qrcode = null
 
-onMessage(data => {
-  const element = getClickElement()
+/**
+ * @param {HTMLElement} element 
+ */
+const editQrcodeElement = (element) => {
   if (element) {
     const isImg = element.tagName.toLowerCase() === 'img'
-    const backgroundImage = isImg ? element.src : element.style.backgroundImage
+    const isCanvas = element.tagName.toLowerCase() === 'canvas'
+    const backgroundImage = isCanvas ? element.toDataURL('image/png') : isImg ? element.src : element.style.backgroundImage
     if (backgroundImage) {
       const base64 = backgroundImage.replace(/^url\([\s\S].*?base64,/, '').replace(/"\)$/, '')
       qrcodeParser(base64).then(res => {
@@ -41,11 +44,30 @@ onMessage(data => {
           const newBase64 = canvas.toDataURL('image/png')
           if (isImg) {
             element.src = newBase64
-          } else {
+          } else if (isCanvas) {
+            element.parentElement.replaceChild(canvas, element)
+          }
+          else {
             element.style.backgroundImage = `url(${newBase64})`
           }
         }
       })
+    }
+  }
+}
+
+const COM_QRCODE = 'Qrcode Edit'
+const COM_QUERY = 'querySelector'
+
+onMessage(info => {
+  if (info.menuItemId === COM_QRCODE) {
+    editQrcodeElement(getClickElement())
+  }
+  if (info.menuItemId === COM_QUERY) {
+    const selector = window.prompt('Query a qrcode element:')
+    if (selector) {
+      const element = document.querySelector(selector)
+      element && editQrcodeElement(element)
     }
   }
 })
