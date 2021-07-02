@@ -17,6 +17,9 @@
     },
     "querySelector": {
       "description": "querySelector"
+    },
+    "Save as file": {
+      "description": "Save as file"
     }
   },
   "background": {

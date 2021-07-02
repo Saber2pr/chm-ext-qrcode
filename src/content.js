@@ -24,49 +24,62 @@ let tempQuery = ''
 /**
  * @param {HTMLElement} element 
  */
-const editQrcodeElement = (element) => {
+const getElementBase64 = (element) => {
   if (element) {
     const isImg = element.tagName.toLowerCase() === 'img'
     const isCanvas = element.tagName.toLowerCase() === 'canvas'
     const backgroundImage = isCanvas ? element.toDataURL('image/png') : isImg ? element.src : element.style.backgroundImage
     if (backgroundImage) {
       const base64 = backgroundImage.replace(/^url\([\s\S].*?base64,/, '').replace(/"\)$/, '')
-      qrcodeParser(base64).then(res => {
-        const url = res.data
-        const newUrl = window.prompt('Edit Qrcode Value:', url)
-        if (newUrl) {
-          /** @type {HTMLCanvasElement} **/
-          const canvas = new AraleQRCode({
-            text: newUrl,
-            width: element.clientWidth,
-            height: element.clientHeight,
-            render: 'canvas',
-          })
-          const newBase64 = canvas.toDataURL('image/png')
-          if (isImg) {
-            element.src = newBase64
-          } else if (isCanvas) {
-            // copy attrs
-            const attrs = element.getAttributeNames()
-            if (attrs && attrs.length) {
-              attrs.forEach(key => {
-                if (!['width', 'height'].includes(key)) {
-                  canvas.setAttribute(key, element.getAttribute(key))
-                }
-              })
-            }
-            element.parentElement.replaceChild(canvas, element)
-          } else {
-            element.style.backgroundImage = `url(${newBase64})`
-          }
-        }
-      })
+      return base64
     }
+  }
+}
+
+/**
+ * @param {HTMLElement} element 
+ */
+const editQrcodeElement = (element) => {
+  const base64 = getElementBase64(element)
+  if (base64) {
+    qrcodeParser(base64).then(res => {
+      const url = res.data
+      const newUrl = window.prompt('Edit Qrcode Value:', url)
+      if (newUrl) {
+        /** @type {HTMLCanvasElement} **/
+        const canvas = new AraleQRCode({
+          text: newUrl,
+          width: element.clientWidth,
+          height: element.clientHeight,
+          render: 'canvas',
+        })
+        const newBase64 = canvas.toDataURL('image/png')
+        const isImg = element.tagName.toLowerCase() === 'img'
+        const isCanvas = element.tagName.toLowerCase() === 'canvas'
+        if (isImg) {
+          element.src = newBase64
+        } else if (isCanvas) {
+          // copy attrs
+          const attrs = element.getAttributeNames()
+          if (attrs && attrs.length) {
+            attrs.forEach(key => {
+              if (!['width', 'height'].includes(key)) {
+                canvas.setAttribute(key, element.getAttribute(key))
+              }
+            })
+          }
+          element.parentElement.replaceChild(canvas, element)
+        } else {
+          element.style.backgroundImage = `url(${newBase64})`
+        }
+      }
+    })
   }
 }
 
 const COM_QRCODE = 'Qrcode Edit'
 const COM_QUERY = 'querySelector'
+const COM_SAVE = 'Save as file'
 
 onMessage(info => {
   if (info.menuItemId === COM_QRCODE) {
@@ -83,5 +96,11 @@ onMessage(info => {
         alert('cannot found an element by the query!')
       }
     }
+  }
+  if (info.menuItemId === COM_SAVE) {
+    const a = document.createElement('a')
+    a.download = `qrcode-${Date.now()}.png`
+    a.href = `data:image/png;base64,${getElementBase64(getClickElement())}`
+    a.click()
   }
 })

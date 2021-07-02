@@ -1,25 +1,23 @@
 const COM_QRCODE = 'Qrcode Edit'
 const COM_QUERY = 'querySelector'
+const COM_SAVE = 'Save as file'
+
+const menus = [
+  COM_QRCODE,
+  COM_QUERY,
+  COM_SAVE
+]
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: COM_QRCODE,
-    title: 'Qrcode Edit',
+  menus.forEach(menu => chrome.contextMenus.create({
+    id: menu,
+    title: menu,
     contexts: ['all']
-  })
-
-  chrome.contextMenus.create({
-    id: COM_QUERY,
-    title: 'querySelector',
-    contexts: ['all']
-  })
+  }))
 })
 
 chrome.contextMenus.onClicked.addListener((info) => {
-  if (info.menuItemId === COM_QRCODE) {
-    sendMessage(info)
-  }
-  if (info.menuItemId === COM_QUERY) {
+  if(menus.includes(info.menuItemId)){
     sendMessage(info)
   }
 })
