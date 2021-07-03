@@ -21,17 +21,23 @@ const getClickElement = () => document.elementFromPoint(x, y)
 let qrcode = null
 let tempQuery = ''
 
+const isImg = element => element && element.tagName.toLowerCase() === 'img'
+const isCanvas = element => element && element.tagName.toLowerCase() === 'canvas'
+
 /**
  * @param {HTMLElement} element 
  */
-const getElementBase64 = (element) => {
+const getElementImageBase64 = (element) => {
   if (element) {
-    const isImg = element.tagName.toLowerCase() === 'img'
-    const isCanvas = element.tagName.toLowerCase() === 'canvas'
-    const backgroundImage = isCanvas ? element.toDataURL('image/png') : isImg ? element.src : element.style.backgroundImage
-    if (backgroundImage) {
-      const base64 = backgroundImage.replace(/^url\([\s\S].*?base64,/, '').replace(/"\)$/, '')
-      return base64
+    if (isCanvas(element)) {
+      return element.toDataURL('image/png')
+    } else if (isImg(element)) {
+      return element.src
+    } else {
+      const backgroundImage = element.style.backgroundImage
+      if (backgroundImage) {
+        return backgroundImage.replace(/^url\("/, '').replace(/"\)$/, '')
+      }
     }
   }
 }
@@ -40,7 +46,7 @@ const getElementBase64 = (element) => {
  * @param {HTMLElement} element 
  */
 const editQrcodeElement = (element) => {
-  const base64 = getElementBase64(element)
+  const base64 = getElementImageBase64(element)
   if (base64) {
     qrcodeParser(base64).then(res => {
       const url = res.data
@@ -54,11 +60,9 @@ const editQrcodeElement = (element) => {
           render: 'canvas',
         })
         const newBase64 = canvas.toDataURL('image/png')
-        const isImg = element.tagName.toLowerCase() === 'img'
-        const isCanvas = element.tagName.toLowerCase() === 'canvas'
-        if (isImg) {
+        if (isImg(element)) {
           element.src = newBase64
-        } else if (isCanvas) {
+        } else if (isCanvas(element)) {
           // copy attrs
           const attrs = element.getAttributeNames()
           if (attrs && attrs.length) {
@@ -98,9 +102,13 @@ onMessage(info => {
     }
   }
   if (info.menuItemId === COM_SAVE) {
-    const a = document.createElement('a')
-    a.download = `qrcode-${Date.now()}.png`
-    a.href = `data:image/png;base64,${getElementBase64(getClickElement())}`
-    a.click()
+    const element = getClickElement()
+    const source = getElementImageBase64(element)
+    if (element && source) {
+      const a = document.createElement('a')
+      a.href = source
+      a.download = `qrcode-${Date.now()}.png`
+      a.click()
+    }
   }
 })
