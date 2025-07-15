@@ -2,32 +2,17 @@
   "name": "Qrcode Edit",
   "description": "Qrcode Edit",
   "version": "0.0.1",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "homepage_url": "https://github.com/saber2pr/chm-ext-qrcode",
   "icons": {
     "64": "assets/logo.png"
   },
-  "page_action": {
+  "action": {
     "default_icon": "assets/logo.png",
     "default_title": "Qrcode Edit"
   },
-  "commands": {
-    "Qrcode Edit": {
-      "description": "Qrcode Edit"
-    },
-    "querySelector": {
-      "description": "querySelector"
-    },
-    "Save as file": {
-      "description": "Save as file"
-    }
-  },
   "background": {
-    "scripts": [
-      "src/util.js",
-      "src/background.js"
-    ],
-    "persistent": false
+    "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
@@ -47,6 +32,17 @@
       "all_frames": true
     }
   ],
+  "commands": {
+    "Qrcode Edit": {
+      "description": "Qrcode Edit"
+    },
+    "querySelector": {
+      "description": "querySelector"
+    },
+    "Save as file": {
+      "description": "Save as file"
+    }
+  },
   "externally_connectable": {
     "ids": [
       "*"
@@ -56,9 +52,12 @@
     "notifications",
     "contextMenus",
     "tabs",
-    "storage",
+    "storage"
+  ],
+  "host_permissions": [
     "<all_urls>"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src * 'unsafe-inline'; img-src 'self' data:;",
-  "update_url": "https://clients2.google.com/service/update2/crx"
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+  }
 }
